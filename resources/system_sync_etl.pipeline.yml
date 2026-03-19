@@ -1,0 +1,15 @@
+resources:
+  pipelines:
+    system_sync_etl:
+      name: system_tables_daily_sync
+      catalog: system_sync
+      schema: default
+      serverless: true
+      photon: true
+      continuous: false
+      channel: CURRENT
+      configuration:
+        "pipelines.refresh.mode": "COMPLETE"
+      libraries:
+        - glob:
+            include: ../src/system_sync_etl/transformations/**

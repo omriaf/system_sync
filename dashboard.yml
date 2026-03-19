@@ -1,0 +1,6 @@
+resources:
+  dashboards:
+    usage_dashboard:
+      display_name: "Detailed Usage Dashboard- Account Pricing"
+      warehouse_id: ${var.warehouse_id}
+      file_path: ../src/dashboard.lvdash.json

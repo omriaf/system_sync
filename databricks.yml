@@ -1,0 +1,17 @@
+bundle:
+  name: system_sync
+
+include:
+  - resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+
+  prod:
+    mode: production
+
+variables:
+  warehouse_id:
+    description: SQL warehouse ID for the dashboard
