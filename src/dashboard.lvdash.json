@@ -222,6 +222,7 @@
         "  COALESCE(wn.workspace_name, u.workspace_id) AS workspace,\n",
         "  u.usage_date,\n",
         "  u.billing_origin_product,\n",
+        "  u.sku_name,\n",
         "  sum(p.price * u.usage_quantity) as Total_DDBUs,\n",
         "  CASE\n",
         "    WHEN lower(u.cloud) = 'aws' THEN Total_DDBUs * ((100 - :aws_discount) / 100)\n",
@@ -272,7 +273,8 @@
         "  u.cloud,\n",
         "  COALESCE(wn.workspace_name, u.workspace_id),\n",
         "  u.usage_date,\n",
-        "  u.billing_origin_product"
+        "  u.billing_origin_product,\n",
+        "  u.sku_name"
       ],
       "parameters": [
         {
@@ -4058,7 +4060,7 @@
           "position": {
             "x": 0,
             "y": 10,
-            "width": 6,
+            "width": 12,
             "height": 9
           }
         },
@@ -4161,8 +4163,8 @@
           },
           "position": {
             "x": 0,
-            "y": 20,
-            "width": 3,
+            "y": 21,
+            "width": 6,
             "height": 6
           }
         },
@@ -4179,7 +4181,7 @@
           "position": {
             "x": 0,
             "y": 8,
-            "width": 6,
+            "width": 12,
             "height": 2
           }
         },
@@ -4194,8 +4196,8 @@
           },
           "position": {
             "x": 0,
-            "y": 19,
-            "width": 3,
+            "y": 20,
+            "width": 6,
             "height": 1
           }
         },
@@ -4209,9 +4211,9 @@
             }
           },
           "position": {
-            "x": 3,
-            "y": 19,
-            "width": 3,
+            "x": 6,
+            "y": 20,
+            "width": 6,
             "height": 1
           }
         },
@@ -4226,8 +4228,8 @@
           },
           "position": {
             "x": 0,
-            "y": 26,
-            "width": 6,
+            "y": 34,
+            "width": 12,
             "height": 1
           }
         },
@@ -4374,8 +4376,8 @@
           },
           "position": {
             "x": 0,
-            "y": 27,
-            "width": 6,
+            "y": 35,
+            "width": 12,
             "height": 6
           }
         },
@@ -4477,9 +4479,9 @@
             }
           },
           "position": {
-            "x": 3,
-            "y": 20,
-            "width": 3,
+            "x": 6,
+            "y": 21,
+            "width": 6,
             "height": 6
           }
         },
@@ -4629,8 +4631,8 @@
           },
           "position": {
             "x": 0,
-            "y": 41,
-            "width": 6,
+            "y": 49,
+            "width": 12,
             "height": 6
           }
         },
@@ -4645,8 +4647,8 @@
           },
           "position": {
             "x": 0,
-            "y": 40,
-            "width": 6,
+            "y": 48,
+            "width": 12,
             "height": 1
           }
         },
@@ -4793,8 +4795,8 @@
           },
           "position": {
             "x": 0,
-            "y": 34,
-            "width": 6,
+            "y": 42,
+            "width": 12,
             "height": 6
           }
         },
@@ -4809,8 +4811,8 @@
           },
           "position": {
             "x": 0,
-            "y": 33,
-            "width": 6,
+            "y": 41,
+            "width": 12,
             "height": 1
           }
         },
@@ -4864,7 +4866,7 @@
           "position": {
             "x": 0,
             "y": 6,
-            "width": 1,
+            "width": 2,
             "height": 2
           }
         },
@@ -4916,9 +4918,9 @@
             }
           },
           "position": {
-            "x": 1,
+            "x": 2,
             "y": 6,
-            "width": 1,
+            "width": 2,
             "height": 2
           }
         },
@@ -4970,9 +4972,9 @@
             }
           },
           "position": {
-            "x": 2,
+            "x": 4,
             "y": 6,
-            "width": 1,
+            "width": 2,
             "height": 2
           }
         },
@@ -4989,7 +4991,7 @@
           "position": {
             "x": 0,
             "y": 0,
-            "width": 6,
+            "width": 12,
             "height": 2
           }
         },
@@ -5196,9 +5198,9 @@
             }
           },
           "position": {
-            "x": 3,
+            "x": 6,
             "y": 6,
-            "width": 1,
+            "width": 2,
             "height": 2
           }
         },
@@ -5405,9 +5407,9 @@
             }
           },
           "position": {
-            "x": 4,
+            "x": 8,
             "y": 6,
-            "width": 1,
+            "width": 2,
             "height": 2
           }
         },
@@ -5614,9 +5616,9 @@
             }
           },
           "position": {
-            "x": 5,
+            "x": 10,
             "y": 6,
-            "width": 1,
+            "width": 2,
             "height": 2
           }
         },
@@ -5640,12 +5642,343 @@
           "position": {
             "x": 0,
             "y": 2,
-            "width": 6,
+            "width": 12,
             "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "d076df3f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0037dc6d",
+                  "fields": [
+                    {
+                      "name": "sku_name",
+                      "expression": "`sku_name`"
+                    },
+                    {
+                      "name": "monthly(usage_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `usage_date`)"
+                    },
+                    {
+                      "name": "sum(Total_Discounted)",
+                      "expression": "SUM(`Total_Discounted`)"
+                    }
+                  ],
+                  "parameterValues": [
+                    {
+                      "keyword": "start_date",
+                      "selection": {
+                        "values": {
+                          "dataType": "DATE",
+                          "values": [
+                            {
+                              "value": "now-12M/M"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "keyword": "end_date",
+                      "selection": {
+                        "values": {
+                          "dataType": "DATE",
+                          "values": [
+                            {
+                              "value": "now/d"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(usage_date)",
+                  "axis": {
+                    "title": "Month"
+                  },
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Total_Discounted)",
+                  "axis": {
+                    "title": "$ Usage"
+                  },
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "$ Usage",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sku_name",
+                  "displayName": "SKU Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 28,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "32c0693c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0037dc6d",
+                  "fields": [
+                    {
+                      "name": "sku_name",
+                      "expression": "`sku_name`"
+                    },
+                    {
+                      "name": "daily(usage_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `usage_date`)"
+                    },
+                    {
+                      "name": "sum(Total_Discounted)",
+                      "expression": "SUM(`Total_Discounted`)"
+                    }
+                  ],
+                  "parameterValues": [
+                    {
+                      "keyword": "start_date",
+                      "selection": {
+                        "values": {
+                          "dataType": "DATE",
+                          "values": [
+                            {
+                              "value": "now-7d/d"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "keyword": "end_date",
+                      "selection": {
+                        "values": {
+                          "dataType": "DATE",
+                          "values": [
+                            {
+                              "value": "now/d"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(usage_date)",
+                  "axis": {
+                    "title": "Month"
+                  },
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(Total_Discounted)",
+                  "axis": {
+                    "title": "$ Usage"
+                  },
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "displayName": "$ Usage",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sku_name",
+                  "displayName": "SKU Name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 28,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "208cbe6d",
+            "queries": [
+              {
+                "name": "dashboards/01f12394b52617f7a5df2be48823986d/datasets/01f12394b5261b19b24fefc65ef86518_sku_name",
+                "query": {
+                  "datasetName": "0037dc6d",
+                  "fields": [
+                    {
+                      "name": "sku_name",
+                      "expression": "`sku_name`"
+                    },
+                    {
+                      "name": "sku_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "sku_name",
+                    "queryName": "dashboards/01f12394b52617f7a5df2be48823986d/datasets/01f12394b5261b19b24fefc65ef86518_sku_name"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "8feab5c3",
+            "queries": [
+              {
+                "name": "dashboards/01f12394b52617f7a5df2be48823986d/datasets/01f12394b5261b19b24fefc65ef86518_billing_origin_product",
+                "query": {
+                  "datasetName": "0037dc6d",
+                  "fields": [
+                    {
+                      "name": "billing_origin_product",
+                      "expression": "`billing_origin_product`"
+                    },
+                    {
+                      "name": "billing_origin_product_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "billing_origin_product",
+                    "queryName": "dashboards/01f12394b52617f7a5df2be48823986d/datasets/01f12394b5261b19b24fefc65ef86518_billing_origin_product"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 19,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "eeb132ee",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## By SKU Type - Last 12 Months"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 27,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "be1210b8",
+            "multilineTextboxSpec": {
+              "lines": [
+                "## By SKU Type - Last 7 Days"
+              ]
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 27,
+            "width": 6,
+            "height": 1
           }
         }
       ],
-      "pageType": "PAGE_TYPE_CANVAS"
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
     },
     {
       "name": "8cef126d",
