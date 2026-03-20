@@ -1,6 +1,6 @@
 from pyspark import pipelines as dp
 
-SKIP_SCHEMAS = {"ai", "information_schema"}
+SKIP_SCHEMAS = {"information_schema"}
 SOURCE_CATALOG = "system"
 TARGET_CATALOG = "system_sync"
 
