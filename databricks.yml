@@ -16,4 +16,4 @@ variables:
   warehouse_id:
     description: SQL warehouse ID for the dashboard and catalog creation task
     # Replace with your SQL warehouse ID, or pass via CLI: --var="warehouse_id=<id>"
-    default: "[My Warehouse ID]"    # <-- replace with your warehouse ID
+    default: <My Warehouse ID>    # <-- replace with your warehouse ID
