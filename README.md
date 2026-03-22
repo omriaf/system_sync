@@ -26,7 +26,10 @@ Because the dashboard reads from pre-computed physical Delta tables (not system 
 
 ### Scheduled Job
 
-A daily job (6:00 AM UTC) that triggers the SDP pipeline below (full refresh).
+A daily job (6:00 AM UTC) with two sequential tasks:
+
+1. **`run_sync_pipeline`** — Triggers the SDP pipeline below (full refresh)
+2. **`refresh_dashboard`** — Refreshes the dashboard to cache query results
 
 ### SDP Pipeline: Dynamic System Table Sync
 

@@ -10,3 +10,10 @@ resources:
           pipeline_task:
             pipeline_id: ${resources.pipelines.system_sync_etl.id}
             full_refresh: true
+
+        - task_key: refresh_dashboard
+          depends_on:
+            - task_key: run_sync_pipeline
+          dashboard_task:
+            dashboard_id: ${resources.dashboards.usage_dashboard.id}
+            warehouse_id: ${var.warehouse_id}
