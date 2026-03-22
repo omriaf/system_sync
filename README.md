@@ -55,13 +55,19 @@ A 7-page AI/BI dashboard providing detailed visibility into billing, compute, jo
 
 **Infrastructure:**
 
-- **SQL Warehouse** (Serverless, Pro, or Classic) — you'll need its **name** (UI deploy) or **ID** (CLI deploy)
+- **SQL Warehouse** (Serverless, Pro, or Classic) — you'll need its **ID**
 - **Unity Catalog** enabled on the workspace
 - **Serverless compute** enabled (for the SDP pipeline)
 
 > System tables must be enabled at the account level. If `system.billing.usage` is not visible, ask your account admin to [enable system tables](https://docs.databricks.com/en/administration-guide/system-tables/index.html).
 
 ## Installation
+
+### Step 1: Get Your Warehouse ID
+
+Find your SQL warehouse ID: **SQL Warehouses** → select your warehouse → copy the **ID** from the URL or the connection details tab.
+
+Then choose one of the deployment options below.
 
 ---
 
@@ -75,25 +81,25 @@ No CLI needed. Deploy directly from the workspace.
 
 **2. Set Your Warehouse**
 
-Open `databricks.yml` in the Git folder. Add a `lookup` with your warehouse name:
+Open `databricks.yml` in the Git folder. Replace `[My Warehouse ID]` with your actual warehouse ID:
 
 ```yaml
 variables:
   warehouse_id:
     description: SQL warehouse ID for the dashboard and catalog creation task
-    lookup:
-      warehouse: "My Warehouse Name"    # <-- replace with your warehouse name
+    # Replace with your SQL warehouse ID, or pass via CLI: --var="warehouse_id=<id>"
+    default: "[My Warehouse ID]"    # <-- replace with your warehouse ID
 ```
 
 Save the file.
 
 **3. Deploy**
 
-Open `databricks.yml` → click the **deployments icon** (🚀 rocket) in the left sidebar → select the **dev** target → click **Deploy**
+Open `databricks.yml` → click the **deployments icon** (🚀) in the left sidebar → select the **dev** target → click **Deploy**
 
 **4. Run**
 
-In the Deployments pane, find `system_sync_daily` under Bundle resources → click **▶** to run.
+In the Deployments pane, find `system_sync_daily` under Bundle resources → click **Run** to run.
 
 First run takes **5–15 minutes**.
 
@@ -118,7 +124,6 @@ databricks configure                    # or: databricks auth login --host <URL>
 
 ```bash
 git clone https://github.com/omriaf/system_sync.git && cd system_sync
-databricks bundle validate --var="warehouse_id=<YOUR_WAREHOUSE_ID>"
 databricks bundle deploy --var="warehouse_id=<YOUR_WAREHOUSE_ID>"
 ```
 
@@ -173,7 +178,7 @@ schedule:
 **Skip schemas** — edit `SKIP_SCHEMAS` in `sync_system_tables.py`:
 
 ```python
-SKIP_SCHEMAS = {"ai", "information_schema", "storage"}  # add schemas to skip
+SKIP_SCHEMAS = {"information_schema", "storage"}  # add schemas to skip
 ```
 
 ## Troubleshooting
@@ -184,4 +189,4 @@ SKIP_SCHEMAS = {"ai", "information_schema", "storage"}  # add schemas to skip
 | `PERMISSION_DENIED: CREATE CATALOG` | Need metastore admin or `CREATE CATALOG` privilege |
 | Pipeline discovers 0 tables | Check `SELECT` access on `system.*` tables |
 | Dashboard shows no data | Verify the job completed successfully in **Workflows** → **Jobs** |
-| `Warehouse not found` | Check warehouse ID/name is correct and warehouse is running |
+| `Warehouse not found` | Check warehouse ID is correct and warehouse is running |
