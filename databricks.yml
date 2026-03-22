@@ -1,6 +1,5 @@
 bundle:
   name: system_sync
-  engine: direct
 
 include:
   - resources/*.yml
@@ -12,11 +11,6 @@ targets:
 
   prod:
     mode: production
-
-resources:
-  catalogs:
-    system_sync:
-      name: system_sync
 
 variables:
   warehouse_id:

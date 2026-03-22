@@ -13,8 +13,10 @@ Because the dashboard reads from pre-computed physical Delta tables (not system 
 - [Components](#components)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-  - [Option A: Databricks UI (Git Folder)](#option-a-databricks-ui-git-folder)
-  - [Option B: CLI](#option-b-cli)
+  - [Step 1: Create the Catalog](#step-1-create-the-catalog)
+  - [Step 2: Get Your Warehouse ID](#step-2-get-your-warehouse-id)
+  - [Deploy — Option A: Databricks UI (Git Folder)](#deploy--option-a-databricks-ui-git-folder)
+  - [Deploy — Option B: CLI](#deploy--option-b-cli)
 - [After Deployment](#after-deployment)
 - [Project Structure](#project-structure)
 - [Customization](#customization)
@@ -24,7 +26,7 @@ Because the dashboard reads from pre-computed physical Delta tables (not system 
 
 ### Scheduled Job
 
-A daily job (6:00 AM UTC) that triggers the SDP pipeline below (full refresh). The `system_sync` catalog is created automatically by the bundle during deployment.
+A daily job (6:00 AM UTC) that triggers the SDP pipeline below (full refresh).
 
 ### SDP Pipeline: Dynamic System Table Sync
 
@@ -55,13 +57,24 @@ A 7-page AI/BI dashboard providing detailed visibility into billing, compute, jo
 - **SQL Warehouse** (Serverless, Pro, or Classic) — you'll need its **ID**
 - **Unity Catalog** enabled on the workspace
 - **Serverless compute** enabled (for the SDP pipeline)
-- **Databricks CLI v0.295.0+** (for CLI deployment only — uses the [direct deployment engine](https://docs.databricks.com/en/dev-tools/bundles/direct))
 
 > System tables must be enabled at the account level. If `system.billing.usage` is not visible, ask your account admin to [enable system tables](https://docs.databricks.com/en/administration-guide/system-tables/index.html).
 
 ## Installation
 
-### Step 1: Get Your Warehouse ID
+### Step 1: Create the Catalog
+
+The `system_sync` catalog must exist before deploying. Open `src/create_catalog.sql` and run it on any SQL warehouse:
+
+**SQL Editor** → paste or open `CREATE CATALOG IF NOT EXISTS system_sync;` → **Run**
+
+Or via CLI:
+
+```bash
+databricks sql execute --sql "CREATE CATALOG IF NOT EXISTS system_sync"
+```
+
+### Step 2: Get Your Warehouse ID
 
 Find your SQL warehouse ID: **SQL Warehouses** → select your warehouse → copy the **ID** from the URL or the connection details tab.
 
@@ -69,7 +82,7 @@ Then choose one of the deployment options below.
 
 ---
 
-### Option A: Databricks UI (Git Folder)
+### Deploy — Option A: Databricks UI (Git Folder)
 
 No CLI needed. Deploy directly from the workspace.
 
@@ -109,7 +122,7 @@ First run takes **5–15 minutes**.
 
 ---
 
-### Option B: CLI
+### Deploy — Option B: CLI
 
 **1. Install CLI and authenticate**
 
@@ -150,13 +163,14 @@ All resources are manageable from the Databricks UI:
 
 ```
 system_sync/
-├── databricks.yml                                    # Bundle config (engine, catalog, warehouse variable)
+├── databricks.yml                                    # Bundle config (warehouse variable)
 ├── pyproject.toml
 ├── resources/
 │   ├── system_sync_etl.pipeline.yml                  # SDP pipeline (serverless, photon, complete refresh)
 │   ├── system_sync_job.job.yml                       # Job: run_sync_pipeline (daily)
 │   └── dashboard.yml                                 # Lakeview dashboard
 └── src/
+    ├── create_catalog.sql                            # Run manually before first deploy
     ├── dashboard.lvdash.json                         # Dashboard definition
     └── system_sync_etl/transformations/
         └── sync_system_tables.py                     # Dynamic discovery + sync + effective_prices
