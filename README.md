@@ -24,10 +24,7 @@ Because the dashboard reads from pre-computed physical Delta tables (not system 
 
 ### Scheduled Job
 
-A daily job (6:00 AM UTC) with two sequential tasks:
-
-1. **`create_catalog`** — SQL notebook that runs `CREATE CATALOG IF NOT EXISTS system_sync` on your SQL warehouse
-2. **`run_sync_pipeline`** — Triggers the SDP pipeline below (full refresh)
+A daily job (6:00 AM UTC) that triggers the SDP pipeline below (full refresh). The `system_sync` catalog is created automatically by the bundle during deployment.
 
 ### SDP Pipeline: Dynamic System Table Sync
 
@@ -58,6 +55,7 @@ A 7-page AI/BI dashboard providing detailed visibility into billing, compute, jo
 - **SQL Warehouse** (Serverless, Pro, or Classic) — you'll need its **ID**
 - **Unity Catalog** enabled on the workspace
 - **Serverless compute** enabled (for the SDP pipeline)
+- **Databricks CLI v0.295.0+** (for CLI deployment only — uses the [direct deployment engine](https://docs.databricks.com/en/dev-tools/bundles/direct))
 
 > System tables must be enabled at the account level. If `system.billing.usage` is not visible, ask your account admin to [enable system tables](https://docs.databricks.com/en/administration-guide/system-tables/index.html).
 
@@ -81,12 +79,12 @@ No CLI needed. Deploy directly from the workspace.
 
 **2. Set Your Warehouse**
 
-Open `databricks.yml` in the Git folder. Replace `[My Warehouse ID]` with your actual warehouse ID:
+Open `databricks.yml` in the Git folder. Replace `<My Warehouse ID>` with your actual warehouse ID:
 
 ```yaml
 variables:
   warehouse_id:
-    description: SQL warehouse ID for the dashboard and catalog creation task
+    description: SQL warehouse ID for the dashboard
     # Replace with your SQL warehouse ID, or pass via CLI: --var="warehouse_id=<id>"
     default: <My Warehouse ID>    # <-- replace with your warehouse ID
 ```
@@ -152,14 +150,13 @@ All resources are manageable from the Databricks UI:
 
 ```
 system_sync/
-├── databricks.yml                                    # Bundle config (variable: warehouse_id)
+├── databricks.yml                                    # Bundle config (engine, catalog, warehouse variable)
 ├── pyproject.toml
 ├── resources/
 │   ├── system_sync_etl.pipeline.yml                  # SDP pipeline (serverless, photon, complete refresh)
-│   ├── system_sync_job.job.yml                       # Job: create_catalog → run_sync_pipeline
+│   ├── system_sync_job.job.yml                       # Job: run_sync_pipeline (daily)
 │   └── dashboard.yml                                 # Lakeview dashboard
 └── src/
-    ├── create_catalog.sql                            # CREATE CATALOG IF NOT EXISTS system_sync
     ├── dashboard.lvdash.json                         # Dashboard definition
     └── system_sync_etl/transformations/
         └── sync_system_tables.py                     # Dynamic discovery + sync + effective_prices

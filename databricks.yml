@@ -1,5 +1,6 @@
 bundle:
   name: system_sync
+  engine: direct
 
 include:
   - resources/*.yml
@@ -12,8 +13,13 @@ targets:
   prod:
     mode: production
 
+resources:
+  catalogs:
+    system_sync:
+      name: system_sync
+
 variables:
   warehouse_id:
-    description: SQL warehouse ID for the dashboard and catalog creation task
+    description: SQL warehouse ID for the dashboard
     # Replace with your SQL warehouse ID, or pass via CLI: --var="warehouse_id=<id>"
     default: <My Warehouse ID>    # <-- replace with your warehouse ID
