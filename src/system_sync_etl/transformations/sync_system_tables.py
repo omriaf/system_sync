@@ -67,13 +67,31 @@ for schema_name, table_name in discovered_tables:
         print(f"WARN: Could not create sync for {SOURCE_CATALOG}.{schema_name}.{table_name}: {e}")
 
 
-# Derived table: account_prices for periods they cover, list_prices for all other periods
+# Derived table: account_prices for periods they cover, list_prices for all other periods.
+# If account_prices is not available, falls back to list_prices only.
+
+_has_account_prices = ("billing", "account_prices") in discovered_tables
 
 @dp.table(
     name=f"{TARGET_CATALOG}.billing.effective_prices",
-    comment="Effective prices: uses account_prices where available by time range, falls back to list_prices for periods not covered",
+    comment="Effective prices: uses account_prices where available by time range, falls back to list_prices for periods not covered (or entirely if account_prices is absent)",
 )
 def effective_prices():
+    if not _has_account_prices:
+        return spark.sql(f"""
+            SELECT
+                account_id,
+                price_start_time,
+                price_end_time,
+                sku_name,
+                cloud,
+                currency_code,
+                usage_unit,
+                try_variant_get(to_variant_object(pricing), '$.effective_list.default', 'decimal(38,18)') AS price,
+                'list_prices' AS source_table
+            FROM {TARGET_CATALOG}.billing.list_prices
+        """)
+
     return spark.sql(f"""
         WITH account_rows AS (
             SELECT
