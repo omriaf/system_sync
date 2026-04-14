@@ -67,20 +67,15 @@ for schema_name, table_name in discovered_tables:
         print(f"WARN: Could not create sync for {SOURCE_CATALOG}.{schema_name}.{table_name}: {e}")
 
 
-# Derived table: picks account_prices if available, otherwise list_prices
+# Derived table: account_prices for periods they cover, list_prices for all other periods
 
 @dp.table(
     name=f"{TARGET_CATALOG}.billing.effective_prices",
-    comment="Effective prices: uses account_prices if valid rows exist (price_end_time IS NULL), otherwise falls back to list_prices",
+    comment="Effective prices: uses account_prices where available by time range, falls back to list_prices for periods not covered",
 )
 def effective_prices():
     return spark.sql(f"""
-        WITH valid_account_count AS (
-            SELECT COUNT(*) AS cnt
-            FROM {TARGET_CATALOG}.billing.account_prices
-            WHERE price_end_time IS NULL
-        ),
-        account_rows AS (
+        WITH account_rows AS (
             SELECT
                 account_id,
                 price_start_time,
@@ -104,9 +99,18 @@ def effective_prices():
                 usage_unit,
                 try_variant_get(to_variant_object(pricing), '$.effective_list.default', 'decimal(38,18)') AS price,
                 'list_prices' AS source_table
-            FROM {TARGET_CATALOG}.billing.list_prices
+            FROM {TARGET_CATALOG}.billing.list_prices l
+            WHERE NOT EXISTS (
+                SELECT 1 FROM account_rows a
+                WHERE a.sku_name = l.sku_name
+                AND a.cloud = l.cloud
+                AND a.usage_unit = l.usage_unit
+                AND a.account_id = l.account_id
+                AND l.price_start_time < COALESCE(a.price_end_time, TIMESTAMP '9999-01-01')
+                AND a.price_start_time < COALESCE(l.price_end_time, TIMESTAMP '9999-01-01')
+            )
         )
-        SELECT * FROM account_rows WHERE (SELECT cnt FROM valid_account_count) > 0
+        SELECT * FROM account_rows
         UNION ALL
-        SELECT * FROM list_rows WHERE (SELECT cnt FROM valid_account_count) = 0
+        SELECT * FROM list_rows
     """)
