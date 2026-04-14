@@ -4,7 +4,12 @@
 
 A Databricks Asset Bundle (DAB) that dynamically discovers and copies **all accessible system tables** into a dedicated `system_sync` catalog, then deploys a multi-page usage analytics dashboard on top of them.
 
-The dashboard provides detailed visibility into billing, compute, jobs, queries, and user-level consumption. Pricing is calculated using an `effective_prices` table that automatically uses **customer-negotiated pricing** (`account_prices`) when available, or falls back to **public list pricing** (`list_prices`) otherwise — ensuring accurate cost reporting regardless of your pricing model.
+The dashboard provides detailed visibility into billing, compute, jobs, queries, and user-level consumption. Pricing is calculated using an `effective_prices` table with the following logic:
+
+- If `account_prices` is available: uses it for time periods it covers (negotiated pricing), and fills in `list_prices` for any periods before the contract start date — ensuring full historical coverage.
+- If `account_prices` is not available: uses `list_prices` for all periods.
+
+This ensures accurate cost reporting regardless of your pricing model, including correct historical data even when negotiated pricing only started partway through the year.
 
 Because the dashboard reads from pre-computed physical Delta tables (not system tables directly), it loads instantly and filters respond without delay.
 
@@ -34,6 +39,8 @@ A daily job (6:00 AM UTC) with two sequential tasks:
 ### SDP Pipeline: Dynamic System Table Sync
 
 A serverless Spark Declarative Pipeline that automatically discovers all readable tables under the `system` catalog, copies them as physical Delta tables into `system_sync`, and builds a derived `effective_prices` table. Tables are fully overwritten on each run. Inaccessible tables are gracefully skipped.
+
+`effective_prices` is built at pipeline planning time based on what tables are accessible: if `account_prices` is readable, it combines account pricing (for covered time ranges) with list pricing (for any gaps); otherwise it uses list pricing only.
 
 ![SDP Pipeline DAG](images/SDP.png)
 
@@ -203,4 +210,6 @@ SKIP_SCHEMAS = {"information_schema", "storage"}  # add schemas to skip
 | `PERMISSION_DENIED: CREATE CATALOG` | Need metastore admin or `CREATE CATALOG` privilege |
 | Pipeline discovers 0 tables | Check `SELECT` access on `system.*` tables |
 | Dashboard shows no data | Verify the job completed successfully in **Workflows** → **Jobs** |
+| Dashboard shows no historical data (before contract date) | Expected if `account_prices` existed but didn't cover earlier dates — redeploy and re-run to apply the updated `effective_prices` logic |
+| Job schedule is paused after deploy | DAB `dev` mode pauses schedules by default — trigger a manual run from Workflows or redeploy |
 | `Warehouse not found` | Check warehouse ID is correct and warehouse is running |
